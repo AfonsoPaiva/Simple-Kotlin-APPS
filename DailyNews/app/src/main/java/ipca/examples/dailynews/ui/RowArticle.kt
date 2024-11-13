@@ -68,12 +68,16 @@ fun RowArticle(modifier: Modifier = Modifier, article: Article) {
 @Composable
 fun RowArticlePreview() {
     DailyNewsTheme {
-        RowArticle(article = Article(
-            "Title",
-            "description",
-            null,
-            "url",
-            Date()
-        ))
+        RowArticle(
+            article = Article(
+                id = 1,
+                title = "Title",
+                description = "description",
+                urlToImage = null,
+                url = "url",
+                publishedAt = Date(),
+                imageUrl = "https://example.com/image.jpg"
+            )
+        )
     }
 }

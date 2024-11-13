@@ -4,11 +4,15 @@ import ipca.examples.dailynews.parseDate
 import org.json.JSONObject
 import java.util.Date
 
-class Article (var title: String? = null,
-               var description: String? = null ,
-               var urlToImage: String? = null,
-               var url: String? = null,
-               var publishedAt: Date? = null) {
+class Article(
+    var title: String? = null,
+    var description: String? = null,
+    var urlToImage: String? = null,
+    var url: String? = null,
+    var publishedAt: Date? = null,
+    id: Int,
+    imageUrl: String
+) {
 
     companion object {
         fun fromJson(json: JSONObject): Article {
@@ -17,7 +21,10 @@ class Article (var title: String? = null,
                 description = json.getString("description"),
                 urlToImage = json.getString("urlToImage"),
                 url = json.getString("url"),
-                publishedAt = json.getString("publishedAt").parseDate())
+                publishedAt = json.getString("publishedAt").parseDate(),
+                id = json.getInt("id"),
+                imageUrl = json.getString("multimediaPrincipal")
+            )
         }
     }
 
