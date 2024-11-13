@@ -1,5 +1,8 @@
 package ipca.examples.dailynews.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import ipca.examples.dailynews.models.Article
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +16,7 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
-data class ArticlesState(
+data class ArticlesState (
     val articles: ArrayList<Article> = arrayListOf(),
     val isLoading: Boolean = false,
     val error: String? = null
@@ -22,66 +25,50 @@ data class ArticlesState(
 class HomeViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(ArticlesState())
-    val uiState: StateFlow<ArticlesState> = _uiState.asStateFlow()
+    val uiState : StateFlow<ArticlesState> = _uiState.asStateFlow()
 
     fun fetchArticles() {
-        // Set loading state
-        _uiState.value = ArticlesState(isLoading = true, error = null)
+
+        _uiState.value = ArticlesState(
+            isLoading = true,
+            error = null)
 
         val client = OkHttpClient()
 
-        // Build the request to the Publico API
         val request = Request.Builder()
-            .url("https://www.publico.pt/api/list/ultimas")
+            .url("https://newsapi.org/v2/top-headlines?country=us&apiKey=1765f87e4ebc40229e80fd0f75b6416c")
             .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
-                _uiState.value = ArticlesState(isLoading = false, error = e.message)
+                _uiState.value = ArticlesState(
+                    isLoading = true,
+                    error = e.message)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!response.isSuccessful) {
-                        _uiState.value = ArticlesState(
-                            isLoading = false,
-                            error = "Unexpected response: $response"
-                        )
-                        return
-                    }
-
+                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
                     val articlesResult = arrayListOf<Article>()
-                    val result = response.body?.string()
-                    result?.let {
-                        val jsonResult = JSONObject(it)
-                        val articlesJson = jsonResult.getJSONArray("items")  // Assuming 'items' contains the articles
-
-                        // Parse the JSON response and map to the Article model
+                    val result = response.body!!.string()
+                    val jsonResult = JSONObject(result)
+                    val status = jsonResult.getString("status")
+                    if (status == "ok") {
+                        val articlesJson = jsonResult.getJSONArray("articles")
                         for (index in 0 until articlesJson.length()) {
                             val articleJson = articlesJson.getJSONObject(index)
-
-                            // Extract relevant fields for the Article
-                            val article = Article(
-                                title = articleJson.optString("title", "No Title"),      // Default "No Title" if title is absent
-                                description = articleJson.optString("lead", ""),         // Use "lead" for description
-                                content = articleJson.optString("body", ""),             // Use "body" for the content
-                                url = articleJson.optString("link", ""),                 // Use "link" for the URL
-                                publishedAt = articleJson.optString("pubDate", "")       // Use "pubDate" for publication date
-                            )
-
+                            val article = Article.fromJson(articleJson)
                             articlesResult.add(article)
                         }
                     }
-
-                    // Update UI state with the fetched articles
                     _uiState.value = ArticlesState(
                         articles = articlesResult,
                         isLoading = false,
-                        error = null
-                    )
+                        error = null)
                 }
             }
         })
     }
+
 }

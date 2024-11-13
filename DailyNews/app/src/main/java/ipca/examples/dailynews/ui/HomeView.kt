@@ -5,23 +5,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -47,67 +40,42 @@ fun HomeView(
     }
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeViewContent(
-    modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
-    uiState: ArticlesState
-) {
-    androidx.compose.foundation.layout.Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        androidx.compose.material3.TopAppBar(
-            title = {
-                androidx.compose.material3.Text(
-                    "News",
-                    color = androidx.compose.ui.graphics.Color(0xFFDDE9F5),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            },
-            modifier = Modifier
-                .height(90.dp)
-                .clip(RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp)),
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = androidx.compose.ui.graphics.Color(0xFF0D47A1)
-            )
-        )
-
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            if (uiState.isLoading) {
-                Text("Loading articles...")
-            } else if (uiState.error != null) {
-                Text("Error: ${uiState.error}")
-            } else if (uiState.articles.isEmpty()) {
-                Text("No articles found!")
-            } else {
-                LazyColumn(modifier = modifier.fillMaxSize()) {
-                    itemsIndexed(
-                        items = uiState.articles,
-                    ) { index, article ->
-                        RowArticle(
-                            modifier = Modifier
-                                .clickable {
-                                    Log.d("dailynews", article.url ?: "none")
-                                    navController.navigate(
-                                        Screen.ArticleDetail.route
-                                            .replace("{articleUrl}", article.url?.encodeURL() ?: "")
-                                    )
-                                },
-                            article = article
-                        )
-                    }
+fun HomeViewContent(modifier: Modifier = Modifier,
+                    navController: NavController = rememberNavController(),
+                    uiState: ArticlesState) {
+    Box(modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center){
+        if (uiState.isLoading) {
+            Text("Loading articles...")
+        }
+        else if (uiState.error != null) {
+            Text("Error: ${uiState.error}")
+        }
+        else if (uiState.articles.isEmpty()) {
+            Text("No articles found!")
+        }else{
+            LazyColumn(modifier = modifier
+                .fillMaxSize()) {
+                itemsIndexed(
+                    items = uiState.articles,
+                ){ index, article ->
+                    RowArticle(
+                        modifier = Modifier
+                            .clickable {
+                                Log.d("dailynews",article.url ?:"none")
+                                navController.navigate(
+                                    Screen.ArticleDetail.route
+                                        .replace("{articleUrl}", article.url?.encodeURL()?:"")
+                                )
+                            },
+                        article = article)
                 }
             }
         }
     }
-}
 
+}
 
 @Preview(showBackground = true)
 @Composable
