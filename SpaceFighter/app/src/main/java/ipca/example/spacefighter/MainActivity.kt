@@ -12,8 +12,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -38,8 +40,14 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("game_screen")
                             })
                         }
-                        composable("game_screen"){
-                            GameScreenView()
+                        composable("game_screen") {
+                            GameScreenView(navController = navController)
+                        }
+                        composable("game_over") {
+                            GameOverView(navController = navController, context = this@MainActivity, score = 0)
+                        }
+                        composable("high_scores") {
+                            HighScoresView(navController = navController, context = this@MainActivity)
                         }
                     }
                 }
@@ -47,4 +55,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

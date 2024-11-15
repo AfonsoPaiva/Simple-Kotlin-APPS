@@ -14,12 +14,17 @@ class Player {
     var maxY = 0
     var minX = 0
     var minY = 0
+    var lives = 1
+
 
     var bitmap : Bitmap
-    var boosting = false
 
-    private val GRAVITY = -10
-    private val MAX_SPEED = 20
+    //tamanho imagem
+    var width = 128
+    var height = 92
+
+    val aceleration = 0.1f
+    private val MAX_SPEED = 500
     private val MIN_SPEED = 1
 
     var detectCollision : Rect
@@ -38,27 +43,34 @@ class Player {
 
         speed = 1
 
-        detectCollision = Rect(x, y, bitmap.width, bitmap.height)
+        detectCollision = Rect(x, y, width, bitmap.height)
     }
 
-    fun update(){
-        if (boosting) speed += 2
-        else speed -= 5
+
+    fun update() {
+        // Gradually increase the speed, ensuring it doesn't exceed the maximum
+        if (speed < MAX_SPEED) {
+            speed += (aceleration).toInt() // Gradual integer increment
+        }
+
+        // Clamp the speed to be within the min and max bounds
         if (speed > MAX_SPEED) speed = MAX_SPEED
         if (speed < MIN_SPEED) speed = MIN_SPEED
 
-        y -= speed + GRAVITY
-
+        // Apply the movement logic for y, clamping to the min and max bounds
         if (y < minY) y = minY
         if (y > maxY) y = maxY
 
+        // Update the collision detection boundaries
         detectCollision.left = x
         detectCollision.top = y
         detectCollision.right = x + bitmap.width
         detectCollision.bottom = y + bitmap.height
-
-
     }
 
+    // Check if player is out of lives
+    fun isOutOfLives(): Boolean {
+        return lives == 0
+    }
 
 }

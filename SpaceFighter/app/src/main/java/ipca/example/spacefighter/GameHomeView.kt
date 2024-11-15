@@ -20,9 +20,10 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun GameHomeView(modifier: Modifier = Modifier,
-                 onPlayClick: () -> Unit = {}){
+                 onPlayClick: () -> Unit = {},
+                 onHighScoresClick: () -> Unit = {}) {
     Box(modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter){
+        contentAlignment = Alignment.BottomCenter) {
         Image(painter = painterResource(id = R.drawable.splash),
             contentDescription = "",
             modifier = Modifier.fillMaxSize(),
@@ -38,13 +39,16 @@ fun GameHomeView(modifier: Modifier = Modifier,
                 contentScale = ContentScale.FillBounds)
             Spacer(modifier = Modifier.height(16.dp))
             Image(painter = painterResource(id = R.drawable.highscore),
-                contentDescription = "high score" ,
-                modifier = Modifier.width(160.dp).height(80.dp),
+                contentDescription = "high score",
+                modifier = Modifier.width(160.dp).height(80.dp)
+                    .clickable {
+                        onHighScoresClick()
+                    },
                 contentScale = ContentScale.FillBounds)
         }
     }
-
 }
+
 
 @Preview(showBackground = true)
 @Composable
