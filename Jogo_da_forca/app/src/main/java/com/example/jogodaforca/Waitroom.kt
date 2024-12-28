@@ -1,5 +1,6 @@
 package com.example.jogodaforca
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -15,6 +16,7 @@ class WaitRoomActivity : AppCompatActivity() {
     private lateinit var currentPlayersTextView: TextView
     private lateinit var startGameButton: Button
     private lateinit var playersListView: ListView
+    private lateinit var roomIdTextView: TextView
     private var currentPlayers = 1 // O host entra primeiro
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +28,10 @@ class WaitRoomActivity : AppCompatActivity() {
         currentPlayersTextView = findViewById(R.id.currentPlayersTextView)
         startGameButton = findViewById(R.id.startGameButton)
         playersListView = findViewById(R.id.playersListView)
+        roomIdTextView = findViewById(R.id.roomIdTextView)
+
+        // Set the roomId in the TextView
+        roomIdTextView.text = "Room ID: $roomId"
 
         val database = FirebaseDatabase.getInstance().reference.child("rooms").child(roomId)
 
@@ -51,22 +57,19 @@ class WaitRoomActivity : AppCompatActivity() {
         })
 
         startGameButton.setOnClickListener {
-            // Verifica se o host está tentando iniciar o jogo e se o número de jogadores foi alcançado
-            val roomRef = database
-            roomRef.get().addOnSuccessListener { snapshot ->
+            database.child("rooms").child(roomId).get().addOnSuccessListener { snapshot ->
                 val room = snapshot.getValue(Room::class.java)
-                if (room != null && room.currentPlayers == room.maxPlayers && room.host == "HostPlayer") {
-                    // Marcar o jogo como iniciado
-                    roomRef.child("game_started").setValue(true)
-
-                    // Navegar para o jogo
-                    // Intent intent = new Intent(this, GameActivity.class);
-                    // startActivity(intent);
+                if (room != null && room.host == "HostPlayer" && room.currentPlayers == room.maxPlayers) {
+                    database.child("rooms").child(roomId).child("status").setValue("In Progress")
+                    val intent = Intent(this, GameActivity::class.java)
+                    intent.putExtra("roomId", roomId)
+                    startActivity(intent)
                 } else {
-                    Toast.makeText(this, "Ainda faltam jogadores ou você não é o host.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Você não é o host ou a sala não está cheia!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
     }
 
     // Função para atualizar a lista de jogadores na interface

@@ -3,11 +3,16 @@ package com.example.jogodaforca
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.FirebaseApp
-import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var playerNameEditText: EditText
+    private lateinit var createRoomButton: Button
+    private lateinit var joinRoomButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,22 +21,30 @@ class MainActivity : AppCompatActivity() {
         // Initialize Firebase
         FirebaseApp.initializeApp(this)
 
-        // Referência ao botão "Criar Sala"
-        val createRoomButton: Button = findViewById(R.id.createRoomButton)
+        playerNameEditText = findViewById(R.id.playerNameEditText)
+        createRoomButton = findViewById(R.id.createRoomButton)
+        joinRoomButton = findViewById(R.id.joinRoomButton)
 
-        // Referência ao botão "Entrar na Sala"
-        val joinRoomButton: Button = findViewById(R.id.joinRoomButton)
-
-        // Configuração do botão "Criar Sala"
         createRoomButton.setOnClickListener {
-            val intent = Intent(this, CreateRoomActivity::class.java)
-            startActivity(intent)
+            val playerName = playerNameEditText.text.toString()
+            if (playerName.isNotEmpty()) {
+                val intent = Intent(this, CreateRoomActivity::class.java)
+                intent.putExtra("playerName", playerName)
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        // Configuração do botão "Entrar na Sala"
         joinRoomButton.setOnClickListener {
-            val intent = Intent(this, JoinRoomActivity::class.java)
-            startActivity(intent)
+            val playerName = playerNameEditText.text.toString()
+            if (playerName.isNotEmpty()) {
+                val intent = Intent(this, JoinRoomActivity::class.java)
+                intent.putExtra("playerName", playerName)
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
