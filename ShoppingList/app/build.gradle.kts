@@ -60,12 +60,19 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Import the Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation ("androidx.compose.material3:material3:1.1.0")
+    // Icons
+    implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+}
 
-
+android {
+    kotlinOptions {
+        freeCompilerArgs += "-Xopt-in=androidx.compose.material3.ExperimentalMaterial3Api"
+    }
 }

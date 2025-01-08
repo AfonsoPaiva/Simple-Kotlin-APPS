@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -29,12 +32,16 @@ fun AddListView(
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            placeholder = {
-                Text("enter list name")
-            },
+                .padding(bottom = 16.dp),
+            placeholder = { Text("Enter list name") },
             value = state.name,
-            onValueChange = viewModel::onNameChange
+            onValueChange = viewModel::onNameChange,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "List Name"
+                )
+            }
         )
         Button(
             modifier = Modifier

@@ -1,86 +1,128 @@
 package ipca.example.shoppinglist.ui.lists.items
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Button
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import ipca.example.shoppinglist.R
-import ipca.example.shoppinglist.ui.theme.ShoppingListTheme
+import ipca.example.shoppinglist.Screen
 
 @Composable
 fun ListItemsView(
     modifier: Modifier = Modifier,
-    listId : String,
-    navController: NavController = rememberNavController()
-                  ){
-
-    val viewModel : ListItemsViewModel = viewModel()
+    listId: String,
+    navController: NavController
+) {
+    val viewModel: ListItemsViewModel = viewModel()
     val state = viewModel.state.value
 
-
-    Box(modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomEnd) {
-
-        LazyColumn(modifier = modifier.fillMaxSize()) {
-            itemsIndexed(
-                items = state.items
-            ) { index, item ->
-
-                ItemRomView(item = item) {
-                    viewModel
-                        .toggleItemChecked(
-                            listId = listId,
-                            item = item
-                        )
-                }
-            }
-        }
-
-        Button(
-            modifier = Modifier
-                .padding(16.dp)
-                .size(64.dp),
-            onClick = {
-
-            }) {
-            Image(
-                modifier = Modifier
-                    .scale(2.0f)
-                    .size(64.dp),
-                colorFilter = ColorFilter.tint(Color.White),
-                painter = painterResource(R.drawable.baseline_add_24),
-                contentDescription = "add"
-            )
-        }
-    }
-
-    LaunchedEffect (key1 = true){
+    LaunchedEffect(key1 = listId) {
         viewModel.getItems(listId)
     }
 
-}
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = "Items",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            )
 
-@Preview(showBackground = true)
-@Composable
-fun ListItemsViewPreview(){
-    ShoppingListTheme {
-        ListItemsView(listId = "")
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(state.items) { item ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = item.bought,
+                                    onCheckedChange = { isChecked ->
+                                        viewModel.updateItemBoughtStatus(listId, item, isChecked)
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(text = item.name, style = MaterialTheme.typography.bodyLarge)
+                                    Text(text = "Quantity: ${item.quantity}", style = MaterialTheme.typography.bodyMedium)
+                                }
+                                IconButton(
+                                    onClick = {
+                                        navController.navigate(Screen.UpdateItem.createRoute(listId, item.docId))
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = "Edit Item"
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (state.error != null) {
+                Text(
+                    text = state.error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
+        }
+
+        // Floating Action Button to navigate to AddItemView
+        FloatingActionButton(
+            onClick = {
+                navController.navigate(Screen.AddItem.createRoute(listId))
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Item",
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }

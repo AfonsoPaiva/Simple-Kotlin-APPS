@@ -1,4 +1,4 @@
-package ipca.example.shoppinglist.ui.login
+package ipca.example.shoppinglist.ui.register
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -8,16 +8,17 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import ipca.example.shoppinglist.TAG
 
-data class LoginState(
+data class RegisterState(
     val email: String = "",
     val password: String = "",
+    val confirmPassword: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
 )
 
-class LoginViewModel : ViewModel() {
+class RegisterViewModel : ViewModel() {
 
-    var state = mutableStateOf(LoginState())
+    var state = mutableStateOf(RegisterState())
         private set
 
     fun onEmailChange(email: String) {
@@ -28,25 +29,33 @@ class LoginViewModel : ViewModel() {
         state.value = state.value.copy(password = password)
     }
 
-    fun onLoginClick(onLoginSuccess: () -> Unit) {
-        if (state.value.email.isBlank() || state.value.password.isBlank()) {
+    fun onConfirmPasswordChange(confirmPassword: String) {
+        state.value = state.value.copy(confirmPassword = confirmPassword)
+    }
+
+    fun onRegisterClick(onRegisterSuccess: () -> Unit) {
+        if (state.value.email.isBlank() || state.value.password.isBlank() || state.value.confirmPassword.isBlank()) {
             showError("Please fill in all fields")
+            return
+        }
+
+        if (state.value.password != state.value.confirmPassword) {
+            showError("Passwords don't match")
             return
         }
 
         state.value = state.value.copy(isLoading = true)
         val auth: FirebaseAuth = Firebase.auth
 
-        auth.signInWithEmailAndPassword(state.value.email, state.value.password)
+        auth.createUserWithEmailAndPassword(state.value.email, state.value.password)
             .addOnCompleteListener { task ->
                 state.value = state.value.copy(isLoading = false)
                 if (task.isSuccessful) {
-                    Log.d(TAG, "signInWithEmail:success")
-                    val user = auth.currentUser
-                    onLoginSuccess()
+                    Log.d(TAG, "createUserWithEmail:success")
+                    onRegisterSuccess()
                 } else {
                     val errorMessage = mapFirebaseErrorToUserFriendly(task.exception?.message)
-                    Log.w(TAG, "signInWithEmail:failure", task.exception)
+                    Log.w(TAG, "createUserWithEmail:failure", task.exception)
                     state.value = state.value.copy(error = errorMessage)
                 }
             }
